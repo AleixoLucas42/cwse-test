@@ -3,8 +3,42 @@ services:
     build: .
     image: aleixolucas/cwse-test:latest
     container_name: cwse-test
+    environment:
+      DB_PASSWORD: super$3cur3seCret
     env_file:
       - .env
     volumes:
       - ./alerts:/app/alerts
+    depends_on:
+      - db
     restart: unless-stopped
+
+  db:
+    image: postgres:16
+    container_name: postgres-cwse
+    environment:
+      POSTGRES_DB: cwse
+      POSTGRES_USER: cwseuser
+      POSTGRES_PASSWORD: super$3cur3seCret
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  db-init:
+    image: postgres:16
+    container_name: postgres-init
+    depends_on:
+      - db
+    environment:
+      PGPASSWORD: super$3cur3seCret
+    volumes:
+      - ./.init-scripts:/scripts
+    entrypoint: /bin/sh
+    command: -c "
+      sleep 5;
+      echo 'Waiting for Postgres to be ready...' &&
+      until pg_isready -h db -p 5432 -U cwseuser; do
+          sleep 1;
+      done &&
+      echo 'Running init SQL...' &&
+      psql -h db -U cwseuser -d cwse -f /scripts/init.sql"

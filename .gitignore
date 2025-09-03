@@ -1,0 +1,6 @@
+.env
+.credentials.telegram
+telegram.session
+alerts/
+session/
+venv/

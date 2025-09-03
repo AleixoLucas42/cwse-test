@@ -1,0 +1,10 @@
+services:
+  cwse-test:
+    build: .
+    image: aleixolucas/cwse-test:latest
+    container_name: cwse-test
+    env_file:
+      - .env
+    volumes:
+      - ./alerts:/app/alerts
+    restart: unless-stopped
